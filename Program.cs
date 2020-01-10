@@ -1,10 +1,10 @@
 ﻿/*** Fill these lines with your complete information.
  * Note: Incomplete information may result in FAIL.
- * Member 1: [First and Last name, first member]: // todo: Tommy van Geest.
- * Member 2: [First and Last name, second member]: // todo: Tim Bras.
- * Std Number 1: [Student number of the first member] // todo: 0919804.
- * Std Number 2: [Student number of the second member] // todo: 0885872.
- * Class: [what is your class, example INF2C] // todo: INF5X.
+ * Member 1: Tommy van Geest.
+ * Member 2: Tim Bras.
+ * Std Number 1: 0919804.
+ * Std Number 2: 0885872.
+ * Class: INF5X.
  ***/
 
 
