@@ -38,11 +38,17 @@ namespace SocketServer
         public const string secret = "SECRET";
     }
 
-    public class SequentialServer
+    
+
+    //-------------------------------------------------------- Our Own Code -----------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class ConcurrentServer
     {
         public Socket listener;
         public IPEndPoint localEndPoint;
-        public IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+        public IPAddress ipAddress = IPAddress.Parse("192.168.178.46");
         public readonly int portNumber = 11111;
 
         public String results = "";
@@ -50,22 +56,34 @@ namespace SocketServer
 
         private Boolean stopCond = false;
         private int processingTime = 1000;
-        private int listeningQueueSize = 5;
+        private int listeningQueueSize = 250;
+        private int threadsBusy = 0;
+
+        //public void multithreading()
+        //{
+        //    for (int x = 0; x < 250; x++)
+        //    {
+        //        Thread myThread = new Thread(() => this.prepareServer());
+        //        myThread.Start();
+        //    }
+        //    if (connectedAmount < 250)
+        //    {
+        //        connectedAmount++;
+
+
+        //        myThread.Start();
+        //    }
+        //}
 
         public void prepareServer()
         {
-            byte[] bytes = new Byte[1024];
-            String data = null;
-            int numByte = 0;
-            string replyMsg = "";
-            bool stop;
-
             try
             {
                 Console.WriteLine("[Server] is ready to start ...");
                 // Establish the local endpoint
                 localEndPoint = new IPEndPoint(ipAddress, portNumber);
                 listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 Console.Out.WriteLine("[Server] A socket is established ...");
                 // associate a network address to the Server Socket. All clients must know this address
                 listener.Bind(localEndPoint);
@@ -73,25 +91,15 @@ namespace SocketServer
                 listener.Listen(listeningQueueSize);
                 while (true)
                 {
-                    Console.WriteLine("Waiting connection ... ");
+                    Console.WriteLine("[Server] Waiting connection ... ");
                     // Suspend while waiting for incoming connection 
                     Socket connection = listener.Accept();
-                    this.sendReply(connection, Message.welcome);
+                    Console.WriteLine("[Server] Accepted connection");
+                    handleClient(connection);
 
-                    stop = false;
-                    while (!stop)
-                    {
-                        numByte = connection.Receive(bytes);
-                        data = Encoding.ASCII.GetString(bytes, 0, numByte);
-                        replyMsg = processMessage(data);
-                        if (replyMsg.Equals(Message.stopCommunication))
-                        {
-                            stop = true;
-                            break;
-                        }
-                        else
-                            this.sendReply(connection, replyMsg);
-                    }
+                    
+
+                    
 
                 }
 
@@ -101,8 +109,43 @@ namespace SocketServer
                 Console.Out.WriteLine(e.Message);
             }
         }
-        public void handleClient(Socket con)
+        public void handleClient(Socket connection)
         {
+            byte[] bytes = new Byte[1024];
+            String data = null;
+            int numByte = 0;
+            string replyMsg = "";
+            bool stop;
+
+            Console.WriteLine("[Server] Going to handle client");
+
+            Thread t = new Thread(() =>
+            {
+                threadsBusy++;
+                this.sendReply(connection, Message.welcome);
+
+                stop = false;
+                while (!stop)
+                {
+                    numByte = connection.Receive(bytes);
+                    data = Encoding.ASCII.GetString(bytes, 0, numByte);
+                    replyMsg = processMessage(data);
+                    if (replyMsg.Equals(Message.stopCommunication))
+                    {
+                        stop = true;
+                        threadsBusy--;
+                        //connectedAmount--;
+                        break;
+                    }
+                    else
+                        this.sendReply(connection, replyMsg);
+                }
+
+            });
+            Console.WriteLine("[Server] New Thread created");
+            t.Start();
+            Console.WriteLine("[Server] Thread started");
+            Console.WriteLine("[Server] Amount of busy Threads:" + threadsBusy);
         }
         public string processMessage(String msg)
         {
@@ -164,26 +207,19 @@ namespace SocketServer
             stopCond = false;
 
         }
-    }
-
-
-    public class ConcurrentServer
-    {
-        // todo: implement this class
 
     }
 
-    public class ServerSimulator
-    {
-        public static void sequentialRun()
-        {
-            Console.Out.WriteLine("[Server] A sample server, sequential version ...");
-            SequentialServer server = new SequentialServer();
-            server.prepareServer();
-        }
+    //------------------------------------------------------------- END OF OWN CODE --------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class ServerSimulator { 
         public static void concurrentRun()
         {
-            // todo: After finishing the concurrent version of the server, implement this method to start the concurrent server
+            Console.Out.WriteLine("[Server] A concurrent version of the sequential server");
+            ConcurrentServer serverConcurrent = new ConcurrentServer();
+            serverConcurrent.prepareServer();
         }
     }
     class Program
@@ -192,9 +228,7 @@ namespace SocketServer
         static void Main(string[] args)
         {
             Console.Clear();
-            ServerSimulator.sequentialRun();
-            // todo: uncomment this when the solution is ready.
-            //ServerSimulator.concurrentRun();
+            ServerSimulator.concurrentRun();
         }
 
     }
