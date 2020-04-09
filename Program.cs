@@ -48,7 +48,7 @@ namespace SocketServer
     {
         public Socket listener;
         public IPEndPoint localEndPoint;
-        public IPAddress ipAddress = IPAddress.Parse("192.168.178.46");
+        public IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
         public readonly int portNumber = 11111;
 
         public String results = "";
