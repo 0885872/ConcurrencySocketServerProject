@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-/* Note: If you are using .net core 2.1, install System.Text.Json (use NuGet). */
 using System.Text.Json; 
 using System.Threading;
 
@@ -30,7 +29,8 @@ namespace SocketServer
         public string status { get; set; }
     }
 
-    public class Message
+    public class Message 
+    // Specifies the message that get sent with every time there is communication
     {
         public const string welcome = "WELCOME";
         public const string stopCommunication = "COMC-STOP";
@@ -38,18 +38,13 @@ namespace SocketServer
         public const string secret = "SECRET";
     }
 
-    
-
-    //-------------------------------------------------------- Our Own Code -----------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
     public class ConcurrentServer
     {
         public Socket listener;
         public IPEndPoint localEndPoint;
         public IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
-        public readonly int portNumber = 11111;
+        public readonly int portNumber = 11111; 
+        //port as described in the sample
 
         public String results = "";
         public LinkedList<ClientInfo> clients = new LinkedList<ClientInfo>();
@@ -58,22 +53,6 @@ namespace SocketServer
         private int processingTime = 1000;
         private int listeningQueueSize = 250;
         private int threadsBusy = 0;
-
-        //public void multithreading()
-        //{
-        //    for (int x = 0; x < 250; x++)
-        //    {
-        //        Thread myThread = new Thread(() => this.prepareServer());
-        //        myThread.Start();
-        //    }
-        //    if (connectedAmount < 250)
-        //    {
-        //        connectedAmount++;
-
-
-        //        myThread.Start();
-        //    }
-        //}
 
         public void prepareServer()
         {
@@ -96,10 +75,6 @@ namespace SocketServer
                     Socket connection = listener.Accept();
                     Console.WriteLine("[Server] Accepted connection");
                     handleClient(connection);
-
-                    
-
-                    
 
                 }
 
@@ -187,6 +162,7 @@ namespace SocketServer
             connection.Send(encodedMsg);
         }
         public void exportResults()
+        // Prints all clients when the ProcessMessage is done with handling the clients
         {
             if (stopCond)
             {
@@ -194,6 +170,7 @@ namespace SocketServer
             }
         }
         public void printClients()
+        // Prints a list of all the clients handled by the server
         {
             string delimiter = " , ";
             Console.Out.WriteLine("[Server] This is the list of clients communicated");
@@ -209,10 +186,6 @@ namespace SocketServer
         }
 
     }
-
-    //------------------------------------------------------------- END OF OWN CODE --------------------------------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public class ServerSimulator { 
         public static void concurrentRun()
